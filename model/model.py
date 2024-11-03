@@ -216,12 +216,50 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
 #     final_clip = concatenate_videoclips(clips)
 #     final_clip.write_videofile("final_output.avi", codec="libx264")
 
+def concatavi():
+    dir = "outputvid"  # Directory containing the AVI files
+    output_file = "final_output.avi"
+    # Collect all .avi files from the specified directory
+    video_files = [
+        os.path.join(dir, file) for file in os.listdir(dir) if file.endswith(".avi")
+    ]
+    # Check if there are any video files to process
+    if not video_files:
+        print("No video files found in the specified directory.")
+        return
+    video_caps = [cv2.VideoCapture(file) for file in video_files]
+    # Get properties from the first video to define codec and frame size
+    first_video = video_caps[0]
+    fps = first_video.get(cv2.CAP_PROP_FPS)
+    width = int(first_video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(first_video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    # Create a VideoWriter object to write the merged video
+    fourcc = cv2.VideoWriter_fourcc(*"XVID")  # Codec for the output video
+    out = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
+    # Read frames from each video and write to output
+    for cap in video_caps:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break  # Break if there are no frames left
+            # Resize frame to ensure it matches the output video dimensions
+            frame = cv2.resize(
+                frame, (width, height)
+            )  # Resize frame to (width, height)
+            out.write(frame)  # Write the resized frame to the output video
+        cap.release()  # Release the video capture object
+    out.release()  # Release the VideoWriter
+    print(f"Merged video saved as: {output_file}")
+
+
+
+
 
 if __name__ == "__main__":
-    video_path = "1088981647-preview.mp4"
+    video_path = "istockphoto-163887417-640_adpp_is.mp4"
     cap = cv2.VideoCapture(video_path)
 
-    chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=1)
+    chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=0.0625)
 
     for index, chunk in enumerate(chunks):
 
@@ -237,4 +275,4 @@ if __name__ == "__main__":
     # print(output_chunk)
     cap.release()
 
-    # concatavi()
+    concatavi()
