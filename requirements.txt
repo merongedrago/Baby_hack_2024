@@ -7,5 +7,8 @@ pylint==2.15.3
 streamlit
 #tempfile
 #time 
+#rust based linter
+ruff==0.0.284
 python-dotenv
 google.generativeai
+numpy 

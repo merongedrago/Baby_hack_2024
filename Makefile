@@ -7,7 +7,7 @@ install:
 format:
 	black *.py
 
-lint:
-	pylint --disable=R,C --ignore-patterns=test_.*?py *.py
+# lint:
+# 	ruff check *.py mylib/*.py
 
 all: install format lint 
