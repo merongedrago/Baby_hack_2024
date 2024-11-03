@@ -46,9 +46,6 @@ if uploaded_file is not None:
         )
 
 
-
-
-
         # Simulate model output notifications for demonstration purposes
         for i in range(100):
             if i % 5 == 0:
