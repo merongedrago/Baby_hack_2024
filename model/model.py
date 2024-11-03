@@ -116,7 +116,7 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
                     output_matrix.append(
                         {
                             "frame": frame_data.get("frame_id"),  # Current frame number
-                            "class_name": model.names[cls],  # Object name
+                            "class_name": model.names[cls].replace('person', 'baby'),  # Object name
                             "norm_x": float(norm_x),  # Normalized X coordinate
                             "norm_y": float(norm_y),  # Normalized Y coordinate
                             "norm_width": float(norm_width),  # Normalized Width
@@ -127,7 +127,7 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
                     output_matrix.append(
                         {
                             "frame": frame_data.get("frame_id"),  # Current frame number
-                            "class_name": model.names[cls],  # Object name
+                            "class_name": model.names[cls].replace('person', 'baby'),  # Object name
                             "norm_x": float(norm_x),  # Normalized X coordinate
                             "norm_y": float(norm_y),  # Normalized Y coordinate
                             "norm_width": float(norm_width),  # Normalized Width
@@ -256,7 +256,7 @@ def concatavi():
 
 
 if __name__ == "__main__":
-    video_path = "istockphoto-163887417-640_adpp_is.mp4"
+    video_path = "test.mp4"
     cap = cv2.VideoCapture(video_path)
 
     chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=0.0625)
