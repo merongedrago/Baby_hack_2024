@@ -1,7 +1,7 @@
 import cv2
 from ultralytics import YOLO
 import os
-from moviepy.editor import VideoFileClip, concatenate_videoclips
+# from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 CUSTOM_FRAME_RATE = 32
 CONF_THRESHOLD = 0.5
@@ -197,24 +197,24 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
     return output_matrix
 
 
-def concatavi():
-    output_dir = "outputvid"
+# def concatavi():
+#     output_dir = "outputvid"
 
-    all_avi_files = []
-    clips = []
+#     all_avi_files = []
+#     clips = []
 
-    for vid in os.listdir(output_dir):
-        file_path = os.path.join(output_dir, vid)
-        if os.path.isfile(file_path):
-            all_avi_files.append(file_path)
+#     for vid in os.listdir(output_dir):
+#         file_path = os.path.join(output_dir, vid)
+#         if os.path.isfile(file_path):
+#             all_avi_files.append(file_path)
 
-    # Load each AVI file into a VideoFileClip object
-    for file in all_avi_files:
-        clip = VideoFileClip(file)
-        clips.append(clip)
+#     # Load each AVI file into a VideoFileClip object
+#     for file in all_avi_files:
+#         clip = VideoFileClip(file)
+#         clips.append(clip)
 
-    final_clip = concatenate_videoclips(clips)
-    final_clip.write_videofile("final_output.avi", codec="libx264")
+#     final_clip = concatenate_videoclips(clips)
+#     final_clip.write_videofile("final_output.avi", codec="libx264")
 
 
 if __name__ == "__main__":
@@ -231,10 +231,9 @@ if __name__ == "__main__":
             chunk=chunk,
             output_path="outputvid/output_video_structured_" + {chunk} + ".avi",
             frame_width_height=width_length,
-            conf_threshold=CONF_THRESHOLD,
-            conf_threshold=CONF_THRESHOLD,
+            conf_threshold=CONF_THRESHOLD
         )
 
     cap.release()
 
-    concatavi()
+    # concatavi()
