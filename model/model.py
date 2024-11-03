@@ -77,7 +77,6 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
 
                     # Check if the detected object is a person
                     if model.names[cls] == "person":
-                    if model.names[cls] == "person":
                         # Calculate expanded width and height
                         expand_width = normalized_width * (1 + EXPANSION_RATE)
                         expand_height = normalized_height * (1 + EXPANSION_RATE)
@@ -223,7 +222,6 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(video_path)
 
     chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=1)
-    chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=1)
 
     for chunk in len(chunks):
 
@@ -238,3 +236,5 @@ if __name__ == "__main__":
         )
 
     cap.release()
+
+    concatavi()
