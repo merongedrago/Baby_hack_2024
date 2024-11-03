@@ -1,6 +1,7 @@
 import cv2
 from ultralytics import YOLO
 import os
+
 # from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 CUSTOM_FRAME_RATE = 32
@@ -21,7 +22,7 @@ def split_video_into_memory_chunks(cap, chunk_duration):
     while True:
         ret, frame_val = cap.read()
 
-        frame = {"frame_data" : frame_val, "frame_id" : cnt}
+        frame = {"frame_data": frame_val, "frame_id": cnt}
 
         if not ret:
             # If we're at the end of the video, add any remaining frames to chunks
@@ -35,7 +36,6 @@ def split_video_into_memory_chunks(cap, chunk_duration):
         if len(current_chunk) == chunk_frames:
             chunks.append(current_chunk)
             current_chunk = []
-        
         cnt += 1
     width_height = (int(cap.get(3)), int(cap.get(4)))
     # cap.release()
@@ -55,8 +55,7 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
     # Get frame dimensions for normalization
     # Get frame dimensions for normalization
     for frame_data in chunk:
-        
-        frame = frame_data.get('frame_data')
+        frame = frame_data.get("frame_data")
 
         frame_height, frame_width = frame.shape[:2]
 
@@ -116,7 +115,7 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
                     # Store information in the output matrix
                     output_matrix.append(
                         {
-                            "frame": frame_data.get('frame_id'),  # Current frame number
+                            "frame": frame_data.get("frame_id"),  # Current frame number
                             "class_name": model.names[cls],  # Object name
                             "norm_x": float(norm_x),  # Normalized X coordinate
                             "norm_y": float(norm_y),  # Normalized Y coordinate
@@ -127,7 +126,7 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
                     )
                     output_matrix.append(
                         {
-                            "frame": frame_data.get('frame_id'),  # Current frame number
+                            "frame": frame_data.get("frame_id"),  # Current frame number
                             "class_name": model.names[cls],  # Object name
                             "norm_x": float(norm_x),  # Normalized X coordinate
                             "norm_y": float(norm_y),  # Normalized Y coordinate
@@ -195,7 +194,6 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
     # Write the frame to output video
     out.write(frame)
 
-
     return output_matrix
 
 
@@ -233,7 +231,7 @@ if __name__ == "__main__":
             chunk=chunk,
             output_path=f"outputvid/output_video_structured_{index}.avi",
             frame_width_height=width_length,
-            conf_threshold=CONF_THRESHOLD
+            conf_threshold=CONF_THRESHOLD,
         )
 
     # print(output_chunk)
