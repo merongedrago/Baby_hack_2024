@@ -1,6 +1,16 @@
 import streamlit as st
 import tempfile
 import time
+import cv2
+from ultralytics import YOLO 
+from model.model import split_video_into_memory_chunks , run_model
+
+CUSTOM_FRAME_RATE = 32
+CONF_THRESHOLD = 0.5
+EXPANSION_RATE = 0.3
+
+
+
 
 st.title("Real-Time Object Detection with YOLO")
 
@@ -19,8 +29,26 @@ if uploaded_file is not None:
     # Replace `run_yolo_model` with the actual function for your model
     # Example: results = run_yolo_model(tfile.name)
     # For this example, simulate model output with a loop
-
     notification_placeholder = st.empty()
+    cap = cv2.VideoCapture(tfile)
+
+    chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration= 3)
+
+    for chunk in chunks:
+
+        output_chunk = run_model(
+            cap = cap,
+            yolo_path='model/yolov8s.pt',
+            chunk = chunk,
+            output_path='output_video_structured.avi',
+            frame_width_height=width_length,
+            conf_threshold=CONF_THRESHOLD
+        )
+
+
+    cap.release()
+
+
 
     # Simulate model output notifications for demonstration purposes
     for i in range(100):
