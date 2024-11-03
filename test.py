@@ -4,10 +4,10 @@ import time
 import cv2
 from ultralytics import YOLO
 from model.model import split_video_into_memory_chunks, run_model
-from lib.obj_functions import data_transforming, output
+from lib.obj_functions import data_transforming, output, circle_overlap_percentage
 from lib.danger_detector import check_dangerous_items, get_completion_gemini
 from dotenv import load_dotenv
-
+import numpy as np
 
 load_dotenv()
 
@@ -27,7 +27,7 @@ notification_placeholder = st.empty()
 cap = cv2.VideoCapture("test_mov.mp4")
 
 chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=3)
-dic_hazard = {}
+hazard = {}
 t = 0
 for chunk in chunks:
 
@@ -39,18 +39,21 @@ for chunk in chunks:
         frame_width_height=width_length,
         conf_threshold=CONF_THRESHOLD,
     )
-    dic_observed = {}
 
-    raw_data = {}
+    dic_observed = {}
+    data = {}
     labels = []
     for i in range(len(output_chunk)):
-        raw_data[i] = output_chunk[i]
-        if raw_data[i]["class_name"] not in labels:
-            labels.append(raw_data[i]["class_name"])
+        data[i] = output_chunk[i]
+        if data[i]["class_name"] not in labels:
+            labels.append(data[i]["class_name"])
 
-    dic_hazard = check_dangerous_items(labels, dic_hazard)
-    data = data_transforming(raw_data, dic_observed, dic_hazard)
+    hazard = check_dangerous_items(labels, hazard)
+    dic_observed = data_transforming(data, dic_observed, hazard)
 
-    print(data)
-    output(data, t)
+    total = []
+
+    result = output(data, t)
+    total.append(total)
+
     t += 1

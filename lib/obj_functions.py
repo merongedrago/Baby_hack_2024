@@ -42,38 +42,68 @@ def data_transforming(data, dic_observed, hazard):
                 np.array([hazard[data[i]["class_name"]]]),
                 np.array([aux]),
             ]
+        elif dic_observed[data[i]["class_name"]][0].shape[0] < j:
+            while dic_observed[data[i]["class_name"]][0].shape[0] < j:
+                num_points = dic_observed[data[i]["class_name"]][0].shape[0]
+                new_coordinates = np.array([[data[i]["norm_x"], data[i]["norm_y"]]])
+                dic_observed[data[i]["class_name"]][0] = np.vstack(
+                    (dic_observed[data[i]["class_name"]][0], new_coordinates)
+                )
+                dic_observed[data[i]["class_name"]][1] = np.append(
+                    dic_observed[data[i]["class_name"]][1],
+                    np.sqrt(
+                        np.sum(
+                            (
+                                dic_observed[data[i]["class_name"]][0][num_points]
+                                - dic_observed[data[i]["class_name"]][0][num_points - 1]
+                            )
+                            ** 2
+                        )
+                    ),
+                )
+                dic_observed[data[i]["class_name"]][2] = np.append(
+                    dic_observed[data[i]["class_name"]][2],
+                    dic_observed[data[i]["class_name"]][1][num_points]
+                    - dic_observed[data[i]["class_name"]][1][num_points - 1],
+                )
+                dic_observed[data[i]["class_name"]][3] = np.append(
+                    dic_observed[data[i]["class_name"]][3],
+                    hazard[data[i]["class_name"]],
+                )
+                dic_observed[data[i]["class_name"]][4] = np.append(
+                    dic_observed[data[i]["class_name"]][4], aux
+                )
         else:
             new_coordinates = np.array([[data[i]["norm_x"], data[i]["norm_y"]]])
             dic_observed[data[i]["class_name"]][0] = np.vstack(
                 (dic_observed[data[i]["class_name"]][0], new_coordinates)
             )
             num_points = dic_observed[data[i]["class_name"]][0].shape[0]
-            print(num_points)
-        if num_points > 1:
-            dic_observed[data[i]["class_name"]][1] = np.append(
-                dic_observed[data[i]["class_name"]][1],
-                np.sqrt(
-                    np.sum(
-                        (
-                            dic_observed[data[i]["class_name"]][0][j]
-                            - dic_observed[data[i]["class_name"]][0][j - 1]
+            if num_points > 1:
+                dic_observed[data[i]["class_name"]][1] = np.append(
+                    dic_observed[data[i]["class_name"]][1],
+                    np.sqrt(
+                        np.sum(
+                            (
+                                dic_observed[data[i]["class_name"]][0][j]
+                                - dic_observed[data[i]["class_name"]][0][j - 1]
+                            )
+                            ** 2
                         )
-                        ** 2
-                    )
-                ),
-            )
-            dic_observed[data[i]["class_name"]][2] = np.append(
-                dic_observed[data[i]["class_name"]][2],
-                dic_observed[data[i]["class_name"]][1][j]
-                - dic_observed[data[i]["class_name"]][1][j - 1],
-            )
-            dic_observed[data[i]["class_name"]][3] = np.append(
-                dic_observed[data[i]["class_name"]][3],
-                hazard[data[i]["class_name"]],
-            )
-            dic_observed[data[i]["class_name"]][4] = np.append(
-                dic_observed[data[i]["class_name"]][4], aux
-            )
+                    ),
+                )
+                dic_observed[data[i]["class_name"]][2] = np.append(
+                    dic_observed[data[i]["class_name"]][2],
+                    dic_observed[data[i]["class_name"]][1][j]
+                    - dic_observed[data[i]["class_name"]][1][j - 1],
+                )
+                dic_observed[data[i]["class_name"]][3] = np.append(
+                    dic_observed[data[i]["class_name"]][3],
+                    hazard[data[i]["class_name"]],
+                )
+                dic_observed[data[i]["class_name"]][4] = np.append(
+                    dic_observed[data[i]["class_name"]][4], aux
+                )
 
         return dic_observed
 
