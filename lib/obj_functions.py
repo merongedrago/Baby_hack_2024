@@ -22,7 +22,7 @@ def data_transforming(data, dic_observed, hazard):
     for i in range(len(data)):
         j = data[i]["frame"]
         num_points = 0
-        if data[i]["class_name"] == "person":
+        if data[i]["class_name"] == "baby":
             x = data[i]["norm_x"]
             y = data[i]["norm_y"]
             h1 = data[i]["norm_height"]
@@ -241,26 +241,14 @@ def circle_overlap_percentage(tlx1, tly1, h1, w1, tlx2, tly2, h2, w2):
 
 def output(dic_observed, time):
     result = ["ALARM", "Warning", "Nothing happening"]
-    if "baby" in dic_observed:
+    if "person" in dic_observed:
         print(f"Baby found on camara, starting survillance...")
-        if "person" in dic_observed:
-            print(f"Baby is with another person. Things should be okay.")
-            for key, values in dic_observed.items():
-                hazard_item = dic_observed[key][3][time]
-                if hazard_item == 1:
-                    print(f"{key} detected on camara, {result[1]}")
-                    return result[1]
-                else:
-                    pass
-        else:
-            print(f"Person not detected, {result[1]}")
-            for key, values in dic_observed.items():
-                hazard_item = dic_observed[key][3][time]
-                if hazard_item == 1:
-                    print(f"{key} detected on camara, {result[0]}")
-                    return result[0]
-                else:
-                    pass
+        for key, values in dic_observed.items():
+            hazard_item = dic_observed[key][3][time]
+            if hazard_item == 1:
+                print(f"{key} detected on camara, {result[0]}")
+                return result[0]
+            else:
+                return result[1]
     else:
-        print(result[2])
         return result[2]

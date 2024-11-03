@@ -29,6 +29,7 @@ cap = cv2.VideoCapture("test_mov.mp4")
 chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=3)
 hazard = {}
 t = 0
+total = []
 for chunk in chunks:
 
     output_chunk = run_model(
@@ -51,9 +52,8 @@ for chunk in chunks:
     hazard = check_dangerous_items(labels, hazard)
     dic_observed = data_transforming(data, dic_observed, hazard)
 
-    total = []
-
     result = output(data, t)
-    total.append(total)
+    total.append(result)
 
     t += 1
+print(total)
