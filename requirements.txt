@@ -12,3 +12,4 @@ ruff==0.0.284
 python-dotenv
 google.generativeai
 numpy 
+moviepy
