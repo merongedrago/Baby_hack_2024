@@ -48,6 +48,7 @@ def data_transforming(data, dic_observed, hazard):
                 (dic_observed[data[i]["class_name"]][0], new_coordinates)
             )
             num_points = dic_observed[data[i]["class_name"]][0].shape[0]
+            print(num_points)
         if num_points > 1:
             dic_observed[data[i]["class_name"]][1] = np.append(
                 dic_observed[data[i]["class_name"]][1],
@@ -218,6 +219,7 @@ def output(dic_observed, time):
                 hazard_item = dic_observed[key][3][time]
                 if hazard_item == 1:
                     print(f"{key} detected on camara, {result[1]}")
+                    return result[1]
                 else:
                     pass
         else:
@@ -226,7 +228,9 @@ def output(dic_observed, time):
                 hazard_item = dic_observed[key][3][time]
                 if hazard_item == 1:
                     print(f"{key} detected on camara, {result[0]}")
+                    return result[0]
                 else:
                     pass
     else:
         print(result[2])
+        return result[2]
