@@ -8,4 +8,4 @@ streamlit
 #tempfile
 #time 
 python-dotenv
- 
+google.generativeai

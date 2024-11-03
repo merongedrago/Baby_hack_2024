@@ -1,6 +1,5 @@
 import google.generativeai as genai
 import os
-from databricks import sql
 from dotenv import load_dotenv
 
 
