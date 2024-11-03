@@ -16,10 +16,13 @@ def split_video_into_memory_chunks(cap, chunk_duration):
 
     chunks = []  # List to hold all chunks
     current_chunk = []  # List to hold frames for the current chunk
-
+    cnt = 1
     # Loop through frames and add them to chunks in memory
     while True:
-        ret, frame = cap.read()
+        ret, frame_val = cap.read()
+
+        frame = {"frame_data" : frame_val, "frame_id" : cnt}
+
         if not ret:
             # If we're at the end of the video, add any remaining frames to chunks
             if current_chunk:
@@ -32,6 +35,8 @@ def split_video_into_memory_chunks(cap, chunk_duration):
         if len(current_chunk) == chunk_frames:
             chunks.append(current_chunk)
             current_chunk = []
+        
+        cnt += 1
     width_height = (int(cap.get(3)), int(cap.get(4)))
     # cap.release()
     print(f"Video split into {len(chunks)} chunks in memory")
@@ -49,8 +54,9 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
 
     # Get frame dimensions for normalization
     # Get frame dimensions for normalization
-    for frame in chunk:
-
+    for frame_data in chunk:
+        
+        frame = frame_data.get('frame_data')
 
         frame_height, frame_width = frame.shape[:2]
 
@@ -110,9 +116,7 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
                     # Store information in the output matrix
                     output_matrix.append(
                         {
-                            "frame": int(
-                                cap.get(cv2.CAP_PROP_POS_FRAMES)
-                            ),  # Current frame number
+                            "frame": frame_data.get('frame_id'),  # Current frame number
                             "class_name": model.names[cls],  # Object name
                             "norm_x": float(norm_x),  # Normalized X coordinate
                             "norm_y": float(norm_y),  # Normalized Y coordinate
@@ -123,9 +127,7 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
                     )
                     output_matrix.append(
                         {
-                            "frame": int(
-                                cap.get(cv2.CAP_PROP_POS_FRAMES)
-                            ),  # Current frame number
+                            "frame": frame_data.get('frame_id'),  # Current frame number
                             "class_name": model.names[cls],  # Object name
                             "norm_x": float(norm_x),  # Normalized X coordinate
                             "norm_y": float(norm_y),  # Normalized Y coordinate
@@ -218,22 +220,23 @@ def run_model(cap, yolo_path, chunk, output_path, frame_width_height, conf_thres
 
 
 if __name__ == "__main__":
-    video_path = ""
+    video_path = "1088981647-preview.mp4"
     cap = cv2.VideoCapture(video_path)
 
     chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=1)
 
-    for chunk in len(chunks):
+    for index, chunk in enumerate(chunks):
 
         output_chunk = run_model(
             cap=cap,
             yolo_path="yolov8s.pt",
             chunk=chunk,
-            output_path="outputvid/output_video_structured_" + {chunk} + ".avi",
+            output_path=f"outputvid/output_video_structured_{index}.avi",
             frame_width_height=width_length,
             conf_threshold=CONF_THRESHOLD
         )
 
+    # print(output_chunk)
     cap.release()
 
     # concatavi()
