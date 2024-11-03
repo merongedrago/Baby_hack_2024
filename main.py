@@ -2,14 +2,14 @@ import streamlit as st
 import tempfile
 import time
 import cv2
-from ultralytics import YOLO 
-from model.model import split_video_into_memory_chunks , run_model
+from ultralytics import YOLO
+from model.model import split_video_into_memory_chunks, run_model
+from lib.obj_functions import data_transforming, output
+from lib.danger_detector import check_dangerous_items, get_completion_gemini
 
 CUSTOM_FRAME_RATE = 32
 CONF_THRESHOLD = 0.5
 EXPANSION_RATE = 0.3
-
-
 
 
 st.title("Real-Time Object Detection with YOLO")
@@ -32,26 +32,38 @@ if uploaded_file is not None:
     notification_placeholder = st.empty()
     cap = cv2.VideoCapture(tfile)
 
-    chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration= 3)
+    chunks, width_length = split_video_into_memory_chunks(cap, chunk_duration=3)
 
     for chunk in chunks:
 
         output_chunk = run_model(
-            cap = cap,
-            yolo_path='model/yolov8s.pt',
-            chunk = chunk,
-            output_path='output_video_structured.avi',
+            cap=cap,
+            yolo_path="model/yolov8s.pt",
+            chunk=chunk,
+            output_path="output_video_structured.avi",
             frame_width_height=width_length,
-            conf_threshold=CONF_THRESHOLD
+            conf_threshold=CONF_THRESHOLD,
         )
 
+        raw_data = {}
+        labels = []
+        for i in range(len(output_chunk)):
+            print(raw_data[i])
+            raw_data[i] = output_chunk[i]
+            if raw_data[i]["class_name"] not in labels:
+                labels.append()
+
+        dic_observed = {}
+        data = data_transforming(raw_data, dic_observed)
 
         # Simulate model output notifications for demonstration purposes
         for i in range(100):
             if i % 5 == 0:
                 notification_placeholder.error("DANGER: Immediate threat detected!")
             elif i % 3 == 0:
-                notification_placeholder.warning("WARNING: Potential danger approaching.")
+                notification_placeholder.warning(
+                    "WARNING: Potential danger approaching."
+                )
             else:
                 notification_placeholder.info("You are OK!")
 
