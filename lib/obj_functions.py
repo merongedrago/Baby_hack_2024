@@ -244,7 +244,7 @@ def output(dic_observed, time):
     if "person" in dic_observed:
         print(f"Baby found on camara, starting survillance...")
         for key, values in dic_observed.items():
-            hazard_item = dic_observed[key][3][time]
+            hazard_item = dic_observed[key][3][0]
             if hazard_item == 1:
                 print(f"{key} detected on camara, {result[0]}")
                 return result[0]
