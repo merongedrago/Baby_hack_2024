@@ -1,7 +1,8 @@
 import math
 import numpy as np
 
-def data_transforming(visuals: list, x: list, y: list, hazard, dic_observed: dict):
+
+def data_transforming(data, dic_observed, hazard):
     """
     Populate the dictionary with observed objects and their coordinates.
 
@@ -14,17 +15,67 @@ def data_transforming(visuals: list, x: list, y: list, hazard, dic_observed: dic
     Returns:
     - dic_observed: updated dictionary.
     """
-    safe = ['obj2','baby', 'person']
-    for i in range(len(visuals)):
-        if visuals[i] not in dic_observed:
-            # Create a new entry with a 2D array for coordinates
-            dic_observed[visuals[i]] = [np.array([[x[i], y[i]]]), np.array([0]), np.array([0]),np.array([hazard[i]]) ]
+    x = data[0]["norm_x"]
+    y = data[0]["norm_y"]
+    h1 = data[0]["norm_height"]
+    w1 = data[0]["norm_width"]
+    for i in range(len(data)):
+        j = data[i]["frame"]
+        num_points = 0
+        if data[i]["class_name"] == "person":
+            x = data[i]["norm_x"]
+            y = data[i]["norm_y"]
+            h1 = data[i]["norm_height"]
+            w1 = data[i]["norm_width"]
+            aux = 0
         else:
-            # Append new values as a row, ensuring the new coordinates are in correct shape
-            new_coordinates = np.array([[x[i], y[i]]])  # Ensure this is a 2D array
-            dic_observed[visuals[i]][0] = np.vstack((dic_observed[visuals[i]][0], new_coordinates))
+            tlx2 = data[i]["norm_x"]
+            tly2 = data[i]["norm_y"]
+            h2 = data[i]["norm_height"]
+            w2 = data[i]["norm_width"]
+            aux = circle_overlap_percentage(x, y, h1, w1, tlx2, tly2, h2, w2)
+        if data[i]["class_name"] not in dic_observed:
+            dic_observed[data[i]["class_name"]] = [
+                np.array([[data[i]["norm_x"], data[i]["norm_y"]]]),
+                np.array([0]),
+                np.array([0]),
+                np.array([hazard[data[i]["class_name"]]]),
+                np.array([aux]),
+            ]
+        else:
+            new_coordinates = np.array([[data[i]["norm_x"], data[i]["norm_y"]]])
+            dic_observed[data[i]["class_name"]][0] = np.vstack(
+                (dic_observed[data[i]["class_name"]][0], new_coordinates)
+            )
+            num_points = dic_observed[data[i]["class_name"]][0].shape[0]
+        if num_points > 1:
+            dic_observed[data[i]["class_name"]][1] = np.append(
+                dic_observed[data[i]["class_name"]][1],
+                np.sqrt(
+                    np.sum(
+                        (
+                            dic_observed[data[i]["class_name"]][0][j]
+                            - dic_observed[data[i]["class_name"]][0][j - 1]
+                        )
+                        ** 2
+                    )
+                ),
+            )
+            dic_observed[data[i]["class_name"]][2] = np.append(
+                dic_observed[data[i]["class_name"]][2],
+                dic_observed[data[i]["class_name"]][1][j]
+                - dic_observed[data[i]["class_name"]][1][j - 1],
+            )
+            dic_observed[data[i]["class_name"]][3] = np.append(
+                dic_observed[data[i]["class_name"]][3],
+                hazard[data[i]["class_name"]],
+            )
+            dic_observed[data[i]["class_name"]][4] = np.append(
+                dic_observed[data[i]["class_name"]][4], aux
+            )
 
-    return dic_observed
+        return dic_observed
+
 
 def pad_matrices(dic_observed):
     """
@@ -54,22 +105,30 @@ def pad_matrices(dic_observed):
 
         # Ensure coordinate_matrix is at least 2D
         if coordinate_matrix.ndim == 1:
-            coordinate_matrix = coordinate_matrix.reshape(1, -1)  # Reshape if it's still 1D
+            coordinate_matrix = coordinate_matrix.reshape(
+                1, -1
+            )  # Reshape if it's still 1D
 
         rows, cols = coordinate_matrix.shape  # Get current rows and columns
 
         if rows < max_rows:
             # Get the last row
-            last_row = coordinate_matrix[-1, :].reshape(1, cols)  # Reshape to keep it 2D for stacking
+            last_row = coordinate_matrix[-1, :].reshape(
+                1, cols
+            )  # Reshape to keep it 2D for stacking
 
             # Calculate how many rows are needed to reach max_rows
             rows_to_add = max_rows - rows
 
             # Stack the last row repeatedly until the matrix has max_rows rows
-            padding = np.tile(last_row, (rows_to_add, 1))  # Use np.tile to repeat last_row correctly
+            padding = np.tile(
+                last_row, (rows_to_add, 1)
+            )  # Use np.tile to repeat last_row correctly
 
             # Update the coordinate matrix in dic_observed
-            dic_observed[key][0] = np.vstack([coordinate_matrix, padding])  # Ensure it's 2D
+            dic_observed[key][0] = np.vstack(
+                [coordinate_matrix, padding]
+            )  # Ensure it's 2D
 
     return dic_observed
 
@@ -87,24 +146,30 @@ def update_dictionary_with_metrics(dic_observed, time, things, hazard):
 
     for key, coordinates in dic_observed.items():
         if key in things:
-          i = things.index(key)
-          dic_observed[key][3] = np.append(coordinates[3], hazard[i])
+            i = things.index(key)
+            dic_observed[key][3] = np.append(coordinates[3], hazard[i])
         else:
-          dic_observed[key][3] = np.append(coordinates[3], coordinates[3][0])
+            dic_observed[key][3] = np.append(coordinates[3], coordinates[3][0])
         # Access the coordinate matrix
         coordinate_matrix = coordinates[0]  # Get the 2D array of coordinates
         num_points = coordinate_matrix.shape[0]
         if num_points > 1:
             # Calculate Euclidean distance between consecutive points
-            dic_observed[key][1] = np.append(coordinates[1], np.sqrt(np.sum((coordinate_matrix[time]- coordinate_matrix[time-1])**2)))
+            dic_observed[key][1] = np.append(
+                coordinates[1],
+                np.sqrt(
+                    np.sum((coordinate_matrix[time] - coordinate_matrix[time - 1]) ** 2)
+                ),
+            )
             # Calculate acceleration (change in distance over time steps)
-            dic_observed[key][2] = np.append(coordinates[2], coordinates[1][time]-coordinates[1][time-1])  # Prepend 0 to match the lengths
+            dic_observed[key][2] = np.append(
+                coordinates[2], coordinates[1][time] - coordinates[1][time - 1]
+            )  # Prepend 0 to match the lengths
     return dic_observed
 
 
-
 def circle_overlap_percentage(tlx1, tly1, h1, w1, tlx2, tly2, h2, w2):
-    '''MAKING AN ASSUMPTION THAT THE FIRST OBJECT IS ALWAYS THE BABY'''
+    """MAKING AN ASSUMPTION THAT THE FIRST OBJECT IS ALWAYS THE BABY"""
     # Calculate distance between centers
     r1 = math.sqrt((h1 / 2) ** 2 + (w1 / 2) ** 2)
     r2 = math.sqrt((h2 / 2) ** 2 + (w2 / 2) ** 2)
@@ -142,25 +207,26 @@ def circle_overlap_percentage(tlx1, tly1, h1, w1, tlx2, tly2, h2, w2):
     percentage_overlap = (overlap_area / child_area) * 100
     return percentage_overlap
 
+
 def output(dic_observed, time):
-  result = ['ALARM', 'Warning', 'Nothing happening']
-  if 'baby' in dic_observed:
-    print(f'Baby found on camara, starting survillance...')
-    if 'person' in dic_observed:
-      print(f'Baby is with another person. Things should be okay.')
-      for key, values in dic_observed.items():
-        hazard_item = dic_observed[key][3][time]
-        if hazard_item == 1:
-          print(f'{key} detected on camara, {result[1]}')
+    result = ["ALARM", "Warning", "Nothing happening"]
+    if "baby" in dic_observed:
+        print(f"Baby found on camara, starting survillance...")
+        if "person" in dic_observed:
+            print(f"Baby is with another person. Things should be okay.")
+            for key, values in dic_observed.items():
+                hazard_item = dic_observed[key][3][time]
+                if hazard_item == 1:
+                    print(f"{key} detected on camara, {result[1]}")
+                else:
+                    pass
         else:
-          pass
+            print(f"Person not detected, {result[1]}")
+            for key, values in dic_observed.items():
+                hazard_item = dic_observed[key][3][time]
+                if hazard_item == 1:
+                    print(f"{key} detected on camara, {result[0]}")
+                else:
+                    pass
     else:
-      print(f'Person not detected, {result[1]}')
-      for key, values in dic_observed.items():
-        hazard_item = dic_observed[key][3][time]
-        if hazard_item == 1:
-          print(f'{key} detected on camara, {result[0]}')
-        else:
-          pass
-  else:
-    print(result[2])
+        print(result[2])

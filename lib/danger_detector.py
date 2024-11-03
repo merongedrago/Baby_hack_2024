@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 # Directly set your API key
 api_key = os.getenv("API_KEY")
- # Replace with your actual API key
+# Replace with your actual API key
 
 # Configure the API key
 genai.configure(api_key=api_key)
@@ -43,17 +43,13 @@ safe_items_for_baby = []
 dangerous_items_for_baby = []
 
 
-def check_dangerous_items(main_list, safe_list, dangerous_list):
+def check_dangerous_items(main_list, result_dic):
+
     # Convert lists to sets for O(1) lookups
-    safe_set = set(safe_list)
-    dangerous_set = set(dangerous_list)
-    result_dict = {}
 
     for item in main_list:
-        if item in dangerous_set:
-            result_dict[item] = 1  # Dangerous
-        elif item in safe_set:
-            result_dict[item] = 0  # Safe
+        if item in result_dic:
+            pass
         else:
             # Check with Gemini for unknown items
 
@@ -63,13 +59,6 @@ def check_dangerous_items(main_list, safe_list, dangerous_list):
             cleaned_response = response.strip()  # Clean response
             danger_value = int(cleaned_response)  # Convert to int
 
-            # Update the appropriate list based on the response
-            if danger_value == 1:
-                dangerous_items_for_baby.append(item)  # Add to dangerous items
-            else:
-                safe_items_for_baby.append(item)  # Add to safe items
+            result_dic[item] = danger_value  # Store the value in the result dictionary
 
-            result_dict[item] = danger_value  # Store the value in the result dictionary
-
-    return result_dict
-
+    return result_dic
