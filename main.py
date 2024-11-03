@@ -46,20 +46,20 @@ if uploaded_file is not None:
         )
 
 
-    cap.release()
 
 
 
-    # Simulate model output notifications for demonstration purposes
-    for i in range(100):
-        if i % 5 == 0:
-            notification_placeholder.error("DANGER: Immediate threat detected!")
-        elif i % 3 == 0:
-            notification_placeholder.warning("WARNING: Potential danger approaching.")
-        else:
-            notification_placeholder.info("You are OK!")
+        # Simulate model output notifications for demonstration purposes
+        for i in range(100):
+            if i % 5 == 0:
+                notification_placeholder.error("DANGER: Immediate threat detected!")
+            elif i % 3 == 0:
+                notification_placeholder.warning("WARNING: Potential danger approaching.")
+            else:
+                notification_placeholder.info("You are OK!")
 
-        # Simulate delay based on model processing time
-        time.sleep(1)  # Adjust as needed for real model latency
+            # Simulate delay based on model processing time
+            time.sleep(1)  # Adjust as needed for real model latency
 
     st.write("Video processing completed.")
+    cap.release()
